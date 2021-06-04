@@ -37,3 +37,92 @@ button {
   .home h1 {
     font-size: 8rem;
     margin-bottom: 4rem; }
+
+.create-page {
+  display: flex;
+  align-items: center;
+  flex-direction: column; }
+  .create-page *:not(:last-child) {
+    margin-bottom: 1rem; }
+  .create-page h1 {
+    font-size: 5rem; }
+  .create-page h2 {
+    font-size: 3rem; }
+  .create-page p {
+    font-size: 2rem; }
+
+.popup {
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0);
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  animation: popup-bg-fade 1s forwards; }
+  .popup .content {
+    background-color: #fff;
+    color: #000;
+    width: 50rem;
+    height: 20rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    border-radius: 1rem;
+    opacity: 0;
+    animation: fade-from-top 1s forwards; }
+    .popup .content > *:not(:last-child) {
+      margin-bottom: 1rem; }
+    .popup .content h2 {
+      font-size: 4rem; }
+    .popup .content input {
+      font-size: 2rem;
+      padding: .3rem 1rem;
+      outline: none; }
+    .popup .content .action-box {
+      position: absolute;
+      bottom: 1rem;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10rem; }
+      .popup .content .action-box button {
+        border: solid .2rem #970197;
+        padding: .5rem 1rem;
+        transition: all .2s;
+        border-radius: .7rem; }
+        .popup .content .action-box button:hover {
+          background-color: #970197;
+          color: #fff; }
+
+@keyframes popup-bg-fade {
+  from {
+    background-color: rgba(0, 0, 0, 0); }
+  to {
+    background-color: rgba(0, 0, 0, 0.5); } }
+
+@keyframes fade-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-10rem); }
+  to {
+    opacity: 1;
+    transform: translateY(0); } }
+
+@keyframes re-popup-bg-fade {
+  from {
+    background-color: rgba(0, 0, 0, 0.5); }
+  to {
+    background-color: rgba(0, 0, 0, 0); } }
+
+@keyframes re-fade-from-top {
+  from {
+    opacity: 1;
+    transform: translateY(0); }
+  to {
+    opacity: 0;
+    transform: translateY(-10rem); } }
