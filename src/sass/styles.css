@@ -1,0 +1,39 @@
+* {
+  margin: 0;
+  padding: 0;
+  color: currentColor;
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif; }
+
+html, body {
+  font-size: 62.5%; }
+
+button {
+  background: none;
+  border: none;
+  font-size: inherit;
+  cursor: pointer; }
+
+.navbar {
+  font-size: 2rem;
+  background-color: #970197;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 10rem; }
+  .navbar .links {
+    width: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; }
+    .navbar .links a, .navbar .links button {
+      color: #fff;
+      text-decoration: none; }
+      .navbar .links a:hover, .navbar .links button:hover {
+        text-decoration: underline; }
+
+.home {
+  text-align: center; }
+  .home h1 {
+    font-size: 8rem;
+    margin-bottom: 4rem; }

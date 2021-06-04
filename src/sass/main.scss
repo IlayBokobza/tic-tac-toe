@@ -1,0 +1,23 @@
+//base style
+*{
+    margin: 0;
+    padding: 0;
+    color: currentColor;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+html,body{
+    font-size: 62.5%;
+}
+
+button{
+    background: none;
+    border: none;
+    font-size: inherit;
+    cursor: pointer;
+}
+
+//imports
+@import "./navbar";
+@import "./home";
