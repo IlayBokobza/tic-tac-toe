@@ -11,7 +11,7 @@ const Home = () => {
 
     return (
         <div className="home">
-            <h1>Wellcome!</h1>
+            <h1>Welcome!</h1>
             <img alt="" src={gifs[randGif]} />
         </div>
     )

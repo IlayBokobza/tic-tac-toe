@@ -3,6 +3,17 @@ import { useSelector } from "react-redux"
 import { useHistory } from "react-router"
 import qs from 'qs'
 
+const sokcetEvents = (socket:any,board:number[][],setBoard:Function) => {
+        //socket events
+        socket.on('madeTurn',(cords:number[]) => {
+            console.log('here')
+            const [y,x] = cords
+            const tempBoard = [...board]
+            tempBoard[y][x] = 2
+            setBoard(tempBoard)
+        })
+}
+
 const Game = () => {
     //gets query 
     const {start} = qs.parse(window.location.href.split('?')[1])
@@ -16,30 +27,17 @@ const Game = () => {
         [0,0,0],
     ])
 
-    const [isMyTurn,setIsMyTurn] = useState((start) ? true:false)
+    const [isMyTurn,setIsMyTurn] = useState((start && start === 'true') ? true:false)
 
 
     //code
-
-    useEffect(() => {
-        if(!socket){
-            return
-        }
-
-        //socket events
-        socket.on('madeTurn',(cords:number[]) => {
-            console.log('here')
-            const [y,x] = cords
-            const tempBoard = [...board]
-            tempBoard[y][x] = 2
-            setBoard(tempBoard)
-        })
-    },[])
 
     if(!socket){
         history.push('/')
         return <div></div>
     }
+
+    sokcetEvents(socket,board,setBoard)
 
     //gets correct jsx for spot in bord
     const getBoardElement = (boardValue:number) => {
@@ -64,6 +62,9 @@ const Game = () => {
         const tempBoard = [...board]
         tempBoard[y][x] = 1
         setBoard(tempBoard)
+        socket.emit('madeTurn',[y,x],(err:string) => {
+            console.warn(err)
+        })
     }
 
     return (

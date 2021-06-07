@@ -17,7 +17,7 @@ func socketEvents(io *socketio.Server) {
 	games := make(map[string]Game)
 
 	io.OnConnect("/", func(s socketio.Conn) error {
-		fmt.Println("new connection")
+		fmt.Printf("\nnew connection \nid is %v", s.ID())
 		return nil
 	})
 
@@ -57,6 +57,9 @@ func socketEvents(io *socketio.Server) {
 		game := games[gameId]
 		var playerType int
 
+		fmt.Printf("\nuser id is %v the user map is: \n", uid)
+		fmt.Println(users)
+
 		if uid == game.player1 {
 			playerType = 1
 		} else {
@@ -65,6 +68,7 @@ func socketEvents(io *socketio.Server) {
 
 		//checks turn
 		if playerType != game.turn {
+			fmt.Printf("\n player type is %v but the turn is %v", playerType, game.turn)
 			return "Error: This is not your turn"
 		}
 
