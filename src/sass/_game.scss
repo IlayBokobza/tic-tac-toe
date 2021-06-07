@@ -1,0 +1,29 @@
+.game-page{
+    text-align: center;
+    font-size: 4rem;
+
+    .game{
+        justify-content: center;
+        display: flex;
+
+        .row{
+            border-right:.2rem solid ;
+
+            &:first-child{
+                border-left:.2rem solid ;
+            }
+        }
+
+        .col{
+            border-bottom: .2rem solid;
+            width: 20rem;
+            height: 20rem;
+            display: grid;
+            place-items: center;
+
+            &:first-child{
+                border-top: .2rem solid;
+            }
+        }
+    }
+}

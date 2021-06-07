@@ -126,3 +126,22 @@ button {
   to {
     opacity: 0;
     transform: translateY(-10rem); } }
+
+.game-page {
+  text-align: center;
+  font-size: 4rem; }
+  .game-page .game {
+    justify-content: center;
+    display: flex; }
+    .game-page .game .row {
+      border-right: .2rem solid; }
+      .game-page .game .row:first-child {
+        border-left: .2rem solid; }
+    .game-page .game .col {
+      border-bottom: .2rem solid;
+      width: 20rem;
+      height: 20rem;
+      display: grid;
+      place-items: center; }
+      .game-page .game .col:first-child {
+        border-top: .2rem solid; }
