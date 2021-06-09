@@ -4,17 +4,12 @@ import (
 	"fmt"
 
 	socketio "github.com/googollee/go-socket.io"
+	"github.com/ilaybokobza/tic-tac-toe/server/games"
 )
-
-type Game struct {
-	player1 string
-	player2 string
-	turn    int
-}
 
 func socketEvents(io *socketio.Server) {
 	users := make(map[string]string)
-	games := make(map[string]Game)
+	games := make(map[string]games.Game)
 
 	io.OnConnect("/", func(s socketio.Conn) error {
 		fmt.Printf("\nnew connection \nid is %v", s.ID())
@@ -26,7 +21,7 @@ func socketEvents(io *socketio.Server) {
 		uid := s.ID()
 		s.Join(id)
 		users[uid] = id
-		games[id] = Game{player1: uid}
+		games[id] = games.Game{player1: uid}
 
 		return id
 	})
