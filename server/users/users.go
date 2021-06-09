@@ -6,20 +6,24 @@ import (
 	"os"
 )
 
+func writeFile(data []byte) error {
+	return ioutil.WriteFile("./data/users.json", data, 0666)
+}
+
 func checkForDataFile() error {
 	//checks for folder
 	_, err := os.Stat("./data")
 	if os.IsNotExist(err) {
 		//no folder found
 		os.Mkdir("./data", 0755)
-		err = ioutil.WriteFile("./data/users.json", []byte("[]"), 0666)
+		err = writeFile([]byte("{}"))
 		return err
 	}
 
 	_, err = os.Stat("./data/users.json")
 	if os.IsNotExist(err) {
 		//only file doent not found
-		err = ioutil.WriteFile("./data/users.json", []byte("[]"), 0666)
+		err = writeFile([]byte("{}"))
 		return err
 	}
 
@@ -33,28 +37,28 @@ func Get() ([]byte, error) {
 	return ioutil.ReadFile("./data/users.json")
 }
 
-func AddUser(id string, name string) error {
+func Add(id string, name string) error {
 	file, err := Get()
 
 	if err != nil {
 		return err
 	}
 
-	var data []map[string]string
+	var data map[string]string
 	err = json.Unmarshal(file, &data)
 
 	if err != nil {
 		return err
 	}
 
-	data = append(data, map[string]string{name: id})
+	data[name] = id
 	json, err := json.Marshal(data)
 
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile("./data/users.json", json, 0666)
+	err = writeFile(json)
 
 	if err != nil {
 		return err
@@ -72,6 +76,20 @@ func Delete(name string) error {
 
 	var users map[string]string
 	err = json.Unmarshal(data, &users)
+
+	if err != nil {
+		return err
+	}
+
+	delete(users, name)
+
+	json, err := json.Marshal(users)
+
+	if err != nil {
+		return err
+	}
+
+	err = writeFile(json)
 
 	if err != nil {
 		return err

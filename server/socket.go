@@ -1,16 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	socketio "github.com/googollee/go-socket.io"
 	"github.com/ilaybokobza/tic-tac-toe/server/games"
+	"github.com/ilaybokobza/tic-tac-toe/server/users"
 )
 
 func socketEvents(io *socketio.Server) {
-	users := make(map[string]string)
-	games := make(map[string]games.Game)
-
 	io.OnConnect("/", func(s socketio.Conn) error {
 		fmt.Printf("\nnew connection \nid is %v", s.ID())
 		return nil
@@ -20,26 +19,35 @@ func socketEvents(io *socketio.Server) {
 		id := createId()
 		uid := s.ID()
 		s.Join(id)
-		users[uid] = id
-		games[id] = games.Game{player1: uid}
+		users.Add(id, uid)
+		games.Add(id, games.Game{Player1: uid})
 
 		return id
 	})
 
 	io.OnEvent("/", "joinGame", func(s socketio.Conn, id string) string {
+		gamesBytes, err := games.Get()
+
+		if err != nil {
+			return err.Error()
+		}
+
+		var gamesData map[string]games.Game
+		json.Unmarshal(gamesBytes, &gamesData)
+
 		//checks if game exists
-		if len(games[id].player1) == 0 {
+		if len(gamesData[id].Player1) == 0 {
 			return "Error: Game not found"
 		}
 
 		//check if game is full
-		if len(games[id].player2) != 0 {
+		if len(gamesData[id].Player2) != 0 {
 			return "Error: Game is full"
 		}
 
 		//joins him to game
-		users[s.ID()] = id
-		games[id] = Game{player1: games[id].player1, player2: s.ID(), turn: 1}
+		users.Add(id, s.ID())
+		games.Add(id, games.Game{Player1: gamesData[id].Player1, Player2: s.ID(), Turn: 1})
 		io.BroadcastToRoom("/", id, "startGame")
 		s.Join(id)
 
@@ -48,38 +56,56 @@ func socketEvents(io *socketio.Server) {
 
 	io.OnEvent("/", "madeTurn", func(s socketio.Conn, cords []int) string {
 		uid := s.ID()
-		gameId := users[uid]
-		game := games[gameId]
+		usersBytes, err := users.Get()
+
+		if err != nil {
+			return err.Error()
+		}
+
+		gamesBytes, err := games.Get()
+
+		if err != nil {
+			return err.Error()
+		}
+
+		var usersData map[string]string
+		var gamesData map[string]games.Game
+
+		json.Unmarshal(usersBytes, &usersData)
+		json.Unmarshal(gamesBytes, &gamesData)
+
+		gameId := usersData[uid]
+		game := gamesData[gameId]
 		var playerType int
 
 		fmt.Printf("\nuser id is %v the user map is: \n", uid)
-		fmt.Println(users)
+		fmt.Println(usersData)
 
-		if uid == game.player1 {
+		if uid == game.Player1 {
 			playerType = 1
 		} else {
 			playerType = 2
 		}
 
 		//checks turn
-		if playerType != game.turn {
-			fmt.Printf("\n player type is %v but the turn is %v", playerType, game.turn)
+		if playerType != game.Turn {
+			fmt.Printf("\n player type is %v but the turn is %v", playerType, game.Turn)
 			return "Error: This is not your turn"
 		}
 
 		//changes turn
-		if game.player1 == uid {
-			games[gameId] = Game{
-				player1: game.player1,
-				player2: game.player2,
-				turn:    1,
-			}
+		if game.Player1 == uid {
+			games.Add(gameId, games.Game{
+				Player1: game.Player1,
+				Player2: game.Player2,
+				Turn:    1,
+			})
 		} else {
-			games[gameId] = Game{
-				player1: game.player1,
-				player2: game.player2,
-				turn:    2,
-			}
+			games.Add(gameId, games.Game{
+				Player1: game.Player1,
+				Player2: game.Player2,
+				Turn:    2,
+			})
 		}
 
 		s.Leave(gameId)
