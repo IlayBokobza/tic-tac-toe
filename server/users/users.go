@@ -47,6 +47,23 @@ func Get() ([]byte, error) {
 	return ioutil.ReadFile("./data/users.json")
 }
 
+func GetData() (map[string]string, error) {
+	bytes, err := Get()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var data map[string]string
+	err = json.Unmarshal(bytes, &data)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
 func Set(id string, name string) error {
 	file, err := Get()
 

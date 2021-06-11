@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 
 	socketio "github.com/googollee/go-socket.io"
@@ -17,8 +16,14 @@ func socketEvents(io *socketio.Server) {
 
 	//user creates game
 	io.OnEvent("/", "createGame", func(s socketio.Conn) string {
-		id := games.CreateID()
 		uid := s.ID()
+		//checks if user has create a game aleady
+		usersData, _ := users.GetData()
+		if len(usersData[uid]) != 0 {
+			return usersData[uid]
+		}
+
+		id := games.CreateID()
 		s.Join(id)
 		users.Set(id, uid)
 		games.Set(id, games.Game{Player1: uid})
@@ -28,14 +33,11 @@ func socketEvents(io *socketio.Server) {
 
 	//user joins game
 	io.OnEvent("/", "joinGame", func(s socketio.Conn, id string) string {
-		gamesBytes, err := games.Get()
+		gamesData, err := games.GetData()
 
 		if err != nil {
 			return err.Error()
 		}
-
-		var gamesData map[string]games.Game
-		json.Unmarshal(gamesBytes, &gamesData)
 
 		//checks if game exists
 		if len(gamesData[id].Player1) == 0 {
@@ -58,14 +60,11 @@ func socketEvents(io *socketio.Server) {
 
 	//user asks if they are in game
 	io.OnEvent("/", "isInGame", func(s socketio.Conn) string {
-		usersBytes, err := users.Get()
+		usersData, err := users.GetData()
 
 		if err != nil {
 			return err.Error()
 		}
-
-		var usersData map[string]string
-		json.Unmarshal(usersBytes, &usersData)
 
 		if len(usersData[s.ID()]) == 0 {
 			return "Error: you are not in a game"
@@ -76,25 +75,19 @@ func socketEvents(io *socketio.Server) {
 
 	//user makes a turn
 	io.OnEvent("/", "madeTurn", func(s socketio.Conn, cords []int) string {
+		usersData, err := users.GetData()
+
+		if err != nil {
+			return err.Error()
+		}
+
+		gamesData, err := games.GetData()
+
+		if err != nil {
+			return err.Error()
+		}
+
 		uid := s.ID()
-		usersBytes, err := users.Get()
-
-		if err != nil {
-			return err.Error()
-		}
-
-		gamesBytes, err := games.Get()
-
-		if err != nil {
-			return err.Error()
-		}
-
-		var usersData map[string]string
-		var gamesData map[string]games.Game
-
-		json.Unmarshal(usersBytes, &usersData)
-		json.Unmarshal(gamesBytes, &gamesData)
-
 		gameId := usersData[uid]
 		game := gamesData[gameId]
 		var playerType int
@@ -134,6 +127,15 @@ func socketEvents(io *socketio.Server) {
 			}
 		}
 
+		//checks for tie
+		if game.TurnsMade+1 == 9 {
+			s.Leave(gameId)
+			io.BroadcastToRoom("/", gameId, "madeTurn", cords)
+			s.Join(gameId)
+			io.BroadcastToRoom("/", gameId, "tie")
+			return ""
+		}
+
 		//swaps turns
 		var newTurn int
 		if playerType == 1 {
@@ -169,23 +171,17 @@ func socketEvents(io *socketio.Server) {
 
 //clears game by one of the players
 func clearGame(io *socketio.Server, uid string) {
-	usersBytes, err := users.Get()
+	usersData, err := users.GetData()
 
 	if err != nil {
 		return
 	}
 
-	gamesBytes, err := games.Get()
+	gamesData, err := games.GetData()
 
 	if err != nil {
 		return
 	}
-
-	var usersData map[string]string
-	var gamesData map[string]games.Game
-
-	json.Unmarshal(usersBytes, &usersData)
-	json.Unmarshal(gamesBytes, &gamesData)
 
 	gameId := usersData[uid]
 	game := gamesData[gameId]

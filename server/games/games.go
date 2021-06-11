@@ -47,6 +47,23 @@ func Get() ([]byte, error) {
 	return ioutil.ReadFile("./data/games.json")
 }
 
+func GetData() (map[string]Game, error) {
+	bytes, err := Get()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var data map[string]Game
+	err = json.Unmarshal(bytes, &data)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
 func Set(id string, game Game) error {
 	file, err := Get()
 
@@ -128,7 +145,7 @@ func Reset(id string) error {
 	}
 
 	game := data[id]
-	data[id] = Game{Player1: game.Player1, Player2: game.Player2, Turn: 0, TurnsMade: 0, Board: [][]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}}
+	data[id] = Game{Player1: game.Player1, Player2: game.Player2, Turn: 1, TurnsMade: 0, Board: [][]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}}
 
 	json, err := json.Marshal(data)
 
@@ -164,7 +181,7 @@ func checkAllPosabilities(board [][]int, p int) [][]int {
 	}
 
 	if board[1][0] == p && board[1][1] == p && board[1][2] == p {
-		return [][]int{{0, 1}, {1, 1}, {1, 2}}
+		return [][]int{{1, 0}, {1, 1}, {1, 2}}
 	}
 
 	if board[2][0] == p && board[2][1] == p && board[2][2] == p {
@@ -216,5 +233,5 @@ func CheckForWin(board [][]int) string {
 		return turnToJson(winPos)
 	}
 
-	return ""
+	return "none"
 }

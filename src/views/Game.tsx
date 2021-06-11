@@ -2,6 +2,7 @@ import { CSSProperties, useEffect, useState } from "react"
 import {socket} from '../service/socket'
 import { useHistory } from "react-router"
 import qs from 'qs'
+import Popup from "../components/Popup"
 
 const Game = () => {
     //gets query 
@@ -35,6 +36,15 @@ const Game = () => {
                 const col = document.getElementById(`${y}|${x}`)!
                 
                 col.style.backgroundColor = '#25d40b'
+            })
+        })
+
+        socket.on('tie',() => {
+            setIsMyTurn(false)
+
+            const cols = document.getElementsByClassName('col')
+            Array.prototype.forEach.call(cols,(col:HTMLDivElement) => {
+                col.style.backgroundColor = '#ff3e30'
             })
         })
 
