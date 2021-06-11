@@ -1,24 +1,11 @@
-import { useEffect, useState } from "react"
-import { useSelector } from "react-redux"
+import { CSSProperties, useEffect, useState } from "react"
+import {socket} from '../service/socket'
 import { useHistory } from "react-router"
 import qs from 'qs'
-
-const sokcetEvents = (socket:any,board:number[][],setBoard:Function) => {
-        //socket events
-        socket.on('madeTurn',(cords:number[]) => {
-            console.log('here')
-            const [y,x] = cords
-            const tempBoard = [...board]
-            tempBoard[y][x] = 2
-            setBoard(tempBoard)
-        })
-}
 
 const Game = () => {
     //gets query 
     const {start} = qs.parse(window.location.href.split('?')[1])
-
-    const socket = useSelector((state:any) => state?.storeReducer?.socket?.payload)
     const history = useHistory()
     //vars
     const [board,setBoard] = useState([
@@ -29,42 +16,81 @@ const Game = () => {
 
     const [isMyTurn,setIsMyTurn] = useState((start && start === 'true') ? true:false)
 
+    
+    //socket events
+    socket.on('madeTurn',(cords:number[]) => {
+        const [y,x] = cords
+        const tempBoard = [...board]
+        tempBoard[y][x] = (start) ? 2:1
+        setBoard(tempBoard)
+        setIsMyTurn(true)
+    })
 
-    //code
+    useEffect(() => {
+        socket.on('win',(winPosJson:string) => {
+            setIsMyTurn(false)
+            const winPoses:number[][] = JSON.parse(winPosJson)
+    
+            winPoses.forEach(winPos => {
+                const [x,y] = winPos
+                const col = document.getElementById(`${y}|${x}`)!
+                
+                col.style.backgroundColor = '#25d40b'
+            })
+        })
+    },[])
 
-    if(!socket){
-        history.push('/')
-        return <div></div>
-    }
 
-    sokcetEvents(socket,board,setBoard)
+    //checks if user is in game
+    socket.emit('isInGame',(err:string) => {
+        if(err){
+            console.log(err)
+            history.push('/')
+            return (<div></div>)
+        }
+    })
 
     //gets correct jsx for spot in bord
     const getBoardElement = (boardValue:number) => {
         if(boardValue === 1){
-            return "X"
+            return <span className="icon material-icons">close</span>
         }else if(boardValue === 2){
-            return "0"
+            return <span className="icon material-icons">radio_button_unchecked</span>
         }else{
             return ""
         }
     }
 
-    const handleClick = (e:any) => {
-        console.log(isMyTurn)
-        if(!isMyTurn){return}
+    const handleClick = ({y,x}:{y:number,x:number}) => {
+        //if its not his trun stop func
+        if(!isMyTurn) return
 
-        const id = e.target.id as string
-        let [yStr,xStr] = id.split('|')
-        const y = parseInt(yStr),x = parseInt(xStr)
-        setIsMyTurn(false)
-        
-        const tempBoard = [...board]
-        tempBoard[y][x] = 1
-        setBoard(tempBoard)
+        //if spot is taken stop func
+        if(board[y][x] > 0) return
+
+
         socket.emit('madeTurn',[y,x],(err:string) => {
-            console.warn(err)
+            if(err){
+                console.warn(err)
+                return
+            }
+            const tempBoard = [...board]
+            tempBoard[y][x] = (start) ? 1:2
+            setBoard(tempBoard)
+            setIsMyTurn(false)
         })
+    }
+
+    const checkBoredPosForStyle = ({x,y}:{x:number,y:number}):CSSProperties => {
+        if(board[y][x] > 0){
+            return {
+                cursor:'default'
+            }
+        }else {
+            return {
+                cursor:'pointer'
+            }
+        }
     }
 
     return (
@@ -74,7 +100,7 @@ const Game = () => {
                 {board.map((row,y) => (
                     <div className="row" key={y}>
                         {row.map((col,x) => (
-                            <div key={x} className="col" id={`${y}|${x}`} onClick={handleClick}>{getBoardElement(col)}</div>
+                            <div key={x} id={`${y}|${x}`} className="col" style={checkBoredPosForStyle({x,y})} onClick={() => {handleClick({y,x})}}>{getBoardElement(col)}</div>
                         ))}
                     </div>
                 ))}

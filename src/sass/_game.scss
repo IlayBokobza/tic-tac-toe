@@ -24,6 +24,11 @@
             &:first-child{
                 border-top: .2rem solid;
             }
+
+            .icon{
+                font-size: 10rem;
+                user-select: none;
+            }
         }
     }
 }

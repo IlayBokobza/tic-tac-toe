@@ -2,13 +2,30 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 
 	socketio "github.com/googollee/go-socket.io"
+	"github.com/ilaybokobza/tic-tac-toe/server/games"
+	"github.com/ilaybokobza/tic-tac-toe/server/users"
 )
 
 func main() {
 	io := socketio.NewServer(nil)
+
+	//resets data files
+	err := users.ResetFile()
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	err = games.ResetFile()
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
 
 	//create events
 	socketEvents(io)

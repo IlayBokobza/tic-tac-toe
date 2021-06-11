@@ -145,3 +145,6 @@ button {
       place-items: center; }
       .game-page .game .col:first-child {
         border-top: .2rem solid; }
+      .game-page .game .col .icon {
+        font-size: 10rem;
+        user-select: none; }

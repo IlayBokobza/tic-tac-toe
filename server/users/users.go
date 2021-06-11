@@ -17,6 +17,11 @@ func checkForDataFile() error {
 		//no folder found
 		os.Mkdir("./data", 0755)
 		err = writeFile([]byte("{}"))
+
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
 		return err
 	}
 
@@ -24,6 +29,11 @@ func checkForDataFile() error {
 	if os.IsNotExist(err) {
 		//only file doent not found
 		err = writeFile([]byte("{}"))
+
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
 		return err
 	}
 
@@ -37,7 +47,7 @@ func Get() ([]byte, error) {
 	return ioutil.ReadFile("./data/users.json")
 }
 
-func Add(id string, name string) error {
+func Set(id string, name string) error {
 	file, err := Get()
 
 	if err != nil {
@@ -96,4 +106,9 @@ func Delete(name string) error {
 	}
 
 	return nil
+}
+
+func ResetFile() error {
+	checkForDataFile()
+	return writeFile([]byte("{}"))
 }

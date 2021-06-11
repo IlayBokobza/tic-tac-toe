@@ -11,20 +11,22 @@ import (
 
 func socketEvents(io *socketio.Server) {
 	io.OnConnect("/", func(s socketio.Conn) error {
-		fmt.Printf("\nnew connection \nid is %v", s.ID())
+		fmt.Printf("New Connection to server with the id of \"%v\". \n", s.ID())
 		return nil
 	})
 
+	//user creates game
 	io.OnEvent("/", "createGame", func(s socketio.Conn) string {
-		id := createId()
+		id := games.CreateID()
 		uid := s.ID()
 		s.Join(id)
-		users.Add(id, uid)
-		games.Add(id, games.Game{Player1: uid})
+		users.Set(id, uid)
+		games.Set(id, games.Game{Player1: uid})
 
 		return id
 	})
 
+	//user joins game
 	io.OnEvent("/", "joinGame", func(s socketio.Conn, id string) string {
 		gamesBytes, err := games.Get()
 
@@ -46,14 +48,33 @@ func socketEvents(io *socketio.Server) {
 		}
 
 		//joins him to game
-		users.Add(id, s.ID())
-		games.Add(id, games.Game{Player1: gamesData[id].Player1, Player2: s.ID(), Turn: 1})
+		users.Set(id, s.ID())
+		games.Set(id, games.Game{Player1: gamesData[id].Player1, Player2: s.ID(), Turn: 1, Board: [][]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}})
 		io.BroadcastToRoom("/", id, "startGame")
 		s.Join(id)
 
 		return ""
 	})
 
+	//user asks if they are in game
+	io.OnEvent("/", "isInGame", func(s socketio.Conn) string {
+		usersBytes, err := users.Get()
+
+		if err != nil {
+			return err.Error()
+		}
+
+		var usersData map[string]string
+		json.Unmarshal(usersBytes, &usersData)
+
+		if len(usersData[s.ID()]) == 0 {
+			return "Error: you are not in a game"
+		}
+
+		return ""
+	})
+
+	//user makes a turn
 	io.OnEvent("/", "madeTurn", func(s socketio.Conn, cords []int) string {
 		uid := s.ID()
 		usersBytes, err := users.Get()
@@ -78,9 +99,6 @@ func socketEvents(io *socketio.Server) {
 		game := gamesData[gameId]
 		var playerType int
 
-		fmt.Printf("\nuser id is %v the user map is: \n", uid)
-		fmt.Println(usersData)
-
 		if uid == game.Player1 {
 			playerType = 1
 		} else {
@@ -89,24 +107,49 @@ func socketEvents(io *socketio.Server) {
 
 		//checks turn
 		if playerType != game.Turn {
-			fmt.Printf("\n player type is %v but the turn is %v", playerType, game.Turn)
-			return "Error: This is not your turn"
+			return "Error: This is not your turn."
 		}
 
-		//changes turn
-		if game.Player1 == uid {
-			games.Add(gameId, games.Game{
-				Player1: game.Player1,
-				Player2: game.Player2,
-				Turn:    1,
-			})
-		} else {
-			games.Add(gameId, games.Game{
-				Player1: game.Player1,
-				Player2: game.Player2,
-				Turn:    2,
-			})
+		//checks thats spot isnt taken
+		y := cords[0]
+		x := cords[1]
+
+		if game.Board[x][y] > 0 {
+			return "Error: Spot is taken."
 		}
+
+		//changes board
+		game.Board[x][y] = playerType
+
+		//checks for win
+		if game.TurnsMade+1 >= 5 {
+			winState := games.CheckForWin(game.Board)
+
+			if winState != "none" {
+				s.Leave(gameId)
+				io.BroadcastToRoom("/", gameId, "madeTurn", cords)
+				s.Join(gameId)
+				io.BroadcastToRoom("/", gameId, "win", winState)
+				return ""
+			}
+		}
+
+		//swaps turns
+		var newTurn int
+		if playerType == 1 {
+			newTurn = 2
+		} else {
+			newTurn = 1
+		}
+
+		//updates data
+		games.Set(gameId, games.Game{
+			Player1:   game.Player1,
+			Player2:   game.Player2,
+			Turn:      newTurn,
+			Board:     game.Board,
+			TurnsMade: game.TurnsMade + 1,
+		})
 
 		s.Leave(gameId)
 		io.BroadcastToRoom("/", gameId, "madeTurn", cords)

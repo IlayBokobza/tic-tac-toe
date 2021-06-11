@@ -4,26 +4,11 @@
   "private": true,
   "proxy": "http://localhost:3000",
   "dependencies": {
-    "@reduxjs/toolkit": "^1.5.1",
-    "@testing-library/jest-dom": "^5.13.0",
-    "@testing-library/react": "^11.2.7",
-    "@testing-library/user-event": "^12.8.3",
-    "@types/jest": "^26.0.23",
-    "@types/node": "^12.20.14",
-    "@types/react": "^17.0.9",
-    "@types/react-dom": "^17.0.6",
-    "@types/react-router-dom": "^5.1.7",
-    "http-proxy-middleware": "^2.0.0",
-    "node-sass": "^6.0.0",
     "qs": "^6.10.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-redux": "^7.2.4",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "4.0.3",
-    "socket.io-client": "^2.4.0",
-    "typescript": "^4.3.2",
-    "web-vitals": "^1.1.2"
+    "socket.io-client": "^2.4.0"
   },
   "scripts": {
     "dev": "concurrently  \"PORT=8080 react-scripts start\" \"node-sass src/sass/main.scss src/sass/styles.css -w\"",
@@ -49,6 +34,13 @@
   },
   "devDependencies": {
     "@types/qs": "^6.9.6",
-    "concurrently": "^6.2.0"
+    "@types/react": "^17.0.11",
+    "@types/react-dom": "^17.0.7",
+    "@types/react-router-dom": "^5.1.7",
+    "concurrently": "^6.2.0",
+    "http-proxy-middleware": "^2.0.0",
+    "node-sass": "^6.0.0",
+    "react-scripts": "^4.0.3",
+    "typescript": "^4.3.2"
   }
 }

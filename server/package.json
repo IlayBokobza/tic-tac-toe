@@ -1,5 +1,5 @@
 {
     "scripts": {
-        "dev":"nodemon --exec go run main.go socket.go utils.go --signal SIGTERM -e go"
+        "dev":"nodemon --exec go run main.go socket.go --signal SIGTERM -e go"
     }
 }
