@@ -157,4 +157,50 @@ func socketEvents(io *socketio.Server) {
 
 		return ""
 	})
+
+	io.OnEvent("/", "endGame", func(s socketio.Conn) {
+		clearGame(io, s.ID())
+	})
+
+	io.OnDisconnect("/", func(s socketio.Conn, _ string) {
+		clearGame(io, s.ID())
+	})
+}
+
+//clears game by one of the players
+func clearGame(io *socketio.Server, uid string) {
+	usersBytes, err := users.Get()
+
+	if err != nil {
+		return
+	}
+
+	gamesBytes, err := games.Get()
+
+	if err != nil {
+		return
+	}
+
+	var usersData map[string]string
+	var gamesData map[string]games.Game
+
+	json.Unmarshal(usersBytes, &usersData)
+	json.Unmarshal(gamesBytes, &gamesData)
+
+	gameId := usersData[uid]
+	game := gamesData[gameId]
+
+	//if user wasnt on the list
+	if len(gameId) == 0 {
+		return
+	}
+
+	//deletes him and his game
+	users.Delete(game.Player1)
+	users.Delete(game.Player2)
+	games.Delete(gameId)
+
+	//clear room
+	io.BroadcastToRoom("/", gameId, "gameOver")
+	io.ClearRoom("/", gameId)
 }

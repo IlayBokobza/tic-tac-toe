@@ -16,17 +16,16 @@ const Game = () => {
 
     const [isMyTurn,setIsMyTurn] = useState((start && start === 'true') ? true:false)
 
-    
-    //socket events
-    socket.on('madeTurn',(cords:number[]) => {
-        const [y,x] = cords
-        const tempBoard = [...board]
-        tempBoard[y][x] = (start) ? 2:1
-        setBoard(tempBoard)
-        setIsMyTurn(true)
-    })
-
     useEffect(() => {
+        //socket events
+        socket.on('madeTurn',(cords:number[]) => {
+            const [y,x] = cords
+            const tempBoard = [...board]
+            tempBoard[y][x] = (start) ? 2:1
+            setBoard(tempBoard)
+            setIsMyTurn(true)
+        })
+
         socket.on('win',(winPosJson:string) => {
             setIsMyTurn(false)
             const winPoses:number[][] = JSON.parse(winPosJson)
@@ -38,8 +37,16 @@ const Game = () => {
                 col.style.backgroundColor = '#25d40b'
             })
         })
-    },[])
 
+        socket.on('gameOver',() => {
+            history.push('/')
+        })
+
+        //on unload
+        return () => {
+            socket.emit('endGame')
+        }
+    },[])
 
     //checks if user is in game
     socket.emit('isInGame',(err:string) => {
@@ -94,7 +101,7 @@ const Game = () => {
     }
 
     return (
-        <div className="game-page">
+        <div id="game-page" className="game-page">
             <h1>Game Room</h1>
             <div className="game">
                 {board.map((row,y) => (
