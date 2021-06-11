@@ -32,7 +32,7 @@ func main() {
 
 	//sets up socket.io
 	go io.Serve()
-	defer io.Close()
+	// defer io.Close()
 	http.Handle("/socket.io/", io)
 
 	//app route

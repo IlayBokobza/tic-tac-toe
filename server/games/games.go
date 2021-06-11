@@ -2,6 +2,7 @@ package games
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -24,6 +25,7 @@ func checkForDataFile() error {
 	//checks for folder
 	_, err := os.Stat("./data")
 	if os.IsNotExist(err) {
+		fmt.Println("Data folder not found creating..")
 		//no folder found
 		os.Mkdir("./data", 0755)
 		err = writeFile([]byte("{}"))
@@ -32,6 +34,7 @@ func checkForDataFile() error {
 
 	_, err = os.Stat("./data/games.json")
 	if os.IsNotExist(err) {
+		fmt.Println("games.json not found creating..")
 		//only file doent not found
 		err = writeFile([]byte("{}"))
 		return err

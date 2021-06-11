@@ -12,7 +12,7 @@
   },
   "scripts": {
     "dev": "concurrently  \"PORT=8080 react-scripts start\" \"node-sass src/sass/main.scss src/sass/styles.css -w\"",
-    "build": "react-scripts build && mv build server/dist"
+    "build": "react-scripts build"
   },
   "eslintConfig": {
     "extends": [

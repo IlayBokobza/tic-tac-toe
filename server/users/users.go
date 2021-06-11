@@ -2,6 +2,7 @@ package users
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -14,6 +15,7 @@ func checkForDataFile() error {
 	//checks for folder
 	_, err := os.Stat("./data")
 	if os.IsNotExist(err) {
+		fmt.Println("Data folder not found creating..")
 		//no folder found
 		os.Mkdir("./data", 0755)
 		err = writeFile([]byte("{}"))
@@ -27,6 +29,7 @@ func checkForDataFile() error {
 
 	_, err = os.Stat("./data/users.json")
 	if os.IsNotExist(err) {
+		fmt.Println("users.json not found creating...")
 		//only file doent not found
 		err = writeFile([]byte("{}"))
 
