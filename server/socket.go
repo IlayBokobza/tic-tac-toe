@@ -160,6 +160,38 @@ func socketEvents(io *socketio.Server) {
 		return ""
 	})
 
+	io.OnEvent("/", "askForNewGame", func(s socketio.Conn) {
+		usersData, err := users.GetData()
+
+		if err != nil {
+			return
+		}
+
+		gameId := usersData[s.ID()]
+
+		s.Leave(gameId)
+		io.BroadcastToRoom("/", gameId, "askForNewGame")
+		s.Join(gameId)
+	})
+
+	io.OnEvent("/", "newGame", func(s socketio.Conn) {
+		usersData, err := users.GetData()
+
+		if err != nil {
+			return
+		}
+
+		gameId := usersData[s.ID()]
+
+		err = games.Reset(gameId)
+
+		if err != nil {
+			return
+		}
+
+		io.BroadcastToRoom("/", gameId, "newGame")
+	})
+
 	io.OnEvent("/", "endGame", func(s socketio.Conn) {
 		clearGame(io, s.ID())
 	})

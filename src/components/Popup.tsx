@@ -7,11 +7,12 @@ type props = {
     acceptText?:string,
     cancelText?:string,
     acceptFunc:Function,
+    cancelFunc?:Function,
     closeFunc:Function,
     showInput?:boolean,
 }
 
-const Popup = ({title,text,onlyAccept,acceptText,acceptFunc,closeFunc,showInput,cancelText}:props) => {
+const Popup = ({title,text,onlyAccept,acceptText,acceptFunc,closeFunc,cancelFunc,showInput,cancelText}:props) => {
     const [bgStyle,setBgStyle] = useState('')
     const [boxStyle,setBoxStyle] = useState('')
 
@@ -34,7 +35,7 @@ const Popup = ({title,text,onlyAccept,acceptText,acceptFunc,closeFunc,showInput,
                         acceptFunc(inputVal)
                         closePopup()
                     }}>{acceptText||'Ok'}</button>
-                    {!onlyAccept && <button onClick={() => {closePopup()}}>{cancelText||'Cancel'}</button>}
+                    {!onlyAccept && <button onClick={() => {if(cancelFunc) cancelFunc();closePopup()}}>{cancelText||'Cancel'}</button>}
                 </div>
             </div>
         </div>        

@@ -16,6 +16,8 @@ const Game = () => {
     ])
 
     const [isMyTurn,setIsMyTurn] = useState((start && start === 'true') ? true:false)
+    const [isGameOver,setIsGameOver] = useState(false)
+    const [showPopup,setShowPopup] = useState(false)
 
     useEffect(() => {
         //socket events
@@ -29,6 +31,7 @@ const Game = () => {
 
         socket.on('win',(winPosJson:string) => {
             setIsMyTurn(false)
+            setIsGameOver(true)
             const winPoses:number[][] = JSON.parse(winPosJson)
     
             winPoses.forEach(winPos => {
@@ -46,6 +49,18 @@ const Game = () => {
             Array.prototype.forEach.call(cols,(col:HTMLDivElement) => {
                 col.style.backgroundColor = '#ff3e30'
             })
+        })
+
+        socket.on('askForNewGame',() => {
+            setShowPopup(true)
+        })
+
+        socket.on('newGame',() => {
+            console.log('here')
+            setBoard([[0,0,0],[0,0,0],[0,0,0]])
+            setIsGameOver(false)
+            setIsMyTurn((start && start === 'true') ? true:false)
+            setShowPopup(false)
         })
 
         socket.on('gameOver',() => {
@@ -122,6 +137,12 @@ const Game = () => {
                     </div>
                 ))}
             </div>
+
+            {/* new game btn */}
+            {isGameOver && <button onClick={() => {socket.emit('askForNewGame');setIsGameOver(false)}}>New Game</button>}
+            {/* popup */}
+            {showPopup && <Popup title="Do you want a new game?" text="The other player has asked you to play another game." 
+            acceptText="Yes" cancelText="No" onlyAccept={false} acceptFunc={() => {socket.emit('newGame');setIsGameOver(false)}} closeFunc={() => {}} cancelFunc={() => {history.push('/')}} />}
         </div>
     )
 }
